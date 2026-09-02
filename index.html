@@ -405,6 +405,8 @@
   .btn.primary:hover{ background: #17233a; }
   .btn.ghost{ background: transparent; color: var(--ink); border: 1px solid var(--line); }
   .btn.ghost:hover{ background: rgba(35,50,77,0.06); }
+  .btn.ghost.danger-btn{ color: var(--stamp-red); border-color: var(--stamp-red-bg); }
+  .btn.ghost.danger-btn:hover{ background: var(--stamp-red-bg); }
 
   /* ---------- Transactions history ---------- */
 
@@ -631,6 +633,7 @@
     <div class="actions">
       <button class="btn ghost" id="export-btn">Exporter la sauvegarde</button>
       <button class="btn ghost" id="import-btn">Importer une sauvegarde</button>
+      <button class="btn ghost danger-btn" id="reset-btn">Tout réinitialiser</button>
       <input type="file" id="import-input" accept="application/json">
     </div>
   </footer>
@@ -962,6 +965,14 @@
     render();
   }
 
+  function resetAll(){
+    if(!confirm('Réinitialiser l\'app ? Toutes les enveloppes, dépenses et le revenu seront supprimés définitivement.\n\nAstuce : exporte une sauvegarde avant si tu veux garder une trace.\n\nContinuer ?')) return;
+    if(!confirm('Dernière confirmation : cette action est irréversible. Tout supprimer ?')) return;
+    state = defaultState();
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    render();
+  }
+
   function exportData(){
     const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
@@ -1065,6 +1076,7 @@
   document.getElementById('new-month-btn').addEventListener('click', startNewMonth);
 
   document.getElementById('export-btn').addEventListener('click', exportData);
+  document.getElementById('reset-btn').addEventListener('click', resetAll);
   document.getElementById('import-btn').addEventListener('click', function(){
     document.getElementById('import-input').click();
   });

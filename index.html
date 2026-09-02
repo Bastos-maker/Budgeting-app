@@ -891,7 +891,10 @@
   }
 
   function deleteEnvelope(id){
-    if(!confirm('Supprimer cette enveloppe ? Son historique de dépenses restera visible mais ne pourra plus être associé à elle.')) return;
+    const env = state.envelopes.find(e => e.id === id);
+    if(!env) return;
+    if(!confirm('Supprimer cette enveloppe ? Son solde actuel (' + fmt(env.balance) + ') sera reversé au revenu non affecté. Son historique de dépenses restera visible mais ne pourra plus être associé à elle.')) return;
+    state.income.distributed -= env.balance;
     state.envelopes = state.envelopes.filter(e => e.id !== id);
     render();
   }

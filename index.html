@@ -709,7 +709,7 @@
 
   function spentThisMonth(envId){
     return state.transactions
-      .filter(t => t.envelopeId === envId && t.date >= state.monthStart)
+      .filter(t => t.envelopeId === envId && t.date >= state.monthStart && t.type !== 'distribution')
       .reduce((sum,t) => sum + t.amount, 0);
   }
 
@@ -870,14 +870,21 @@
   // ---------- Actions ----------
 
   function addEnvelope(name, amount, rollover){
-    state.envelopes.push({
+    const env = {
       id: uid(),
       name: name,
-      allocated: amount,
+      allocated: 0,
       rollover: rollover,
-      balance: amount
-    });
-    render();
+      balance: 0
+    };
+    state.envelopes.push(env);
+    if(amount > 0){
+      state.income.distributed += amount;
+      env.allocated += amount;
+      addTransaction(env.id, -amount, todayISO(), 'Allocation initiale', 'distribution');
+    } else {
+      render();
+    }
   }
 
   function deleteEnvelope(id){
@@ -918,6 +925,8 @@
 
   function addDistribution(envelopeId, amount, date, description){
     state.income.distributed += amount;
+    const env = state.envelopes.find(e => e.id === envelopeId);
+    if(env) env.allocated += amount;
     addTransaction(envelopeId, -amount, date, description || 'Distribution du revenu', 'distribution');
   }
 
@@ -931,7 +940,10 @@
     if(!tx) return;
     const env = state.envelopes.find(e => e.id === tx.envelopeId);
     if(env) env.balance += tx.amount;
-    if(tx.type === 'distribution') state.income.distributed += tx.amount;
+    if(tx.type === 'distribution'){
+      state.income.distributed += tx.amount;
+      if(env) env.allocated += tx.amount;
+    }
     state.transactions = state.transactions.filter(t => t.id !== id);
     render();
   }

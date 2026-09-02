@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enveloppes — budget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --kraft: #e8dcc8;
+    --kraft-dark: #d9c9ab;
+    --paper: #f7f2e7;
+    --ink: #23324d;
+    --ink-soft: #4a5876;
+    --stamp-red: #a63e26;
+    --stamp-red-bg: #f1ded6;
+    --seal-gold: #b8923d;
+    --seal-gold-bg: #f1e6c9;
+    --sage: #3f6b56;
+    --sage-bg: #dbe7de;
+    --line: rgba(35,50,77,0.16);
+    --shadow: rgba(35,50,77,0.18);
+    --font-display: 'IBM Plex Mono', monospace;
+    --font-body: 'Libre Franklin', sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background: var(--kraft);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body{
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(35,50,77,0.05) 1px, transparent 0);
+    background-size: 18px 18px;
+  }
+
+  .wrap{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+
+  /* ---------- Header / ledger bar ---------- */
+
+  header.ledger{
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 4px;
+    padding: 22px 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    align-items: flex-end;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header.ledger::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0; height:4px;
+    background: repeating-linear-gradient(90deg, var(--seal-gold) 0 14px, transparent 14px 22px);
+    opacity:0.7;
+  }
+
+  .ledger-title{
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--kraft);
+    opacity: 0.75;
+    margin: 0 0 6px;
+  }
+
+  .ledger-month{
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0;
+    font-family: var(--font-body);
+  }
+
+  .ledger-figures{
+    display:flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .figure{ text-align: left; }
+  .figure .label{
+    font-size: 11.5px;
+    color: var(--kraft);
+    opacity: 0.65;
+    margin-bottom: 4px;
+  }
+  .figure .value{
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .figure .value.neg{ color: #e2a396; }
+  .figure .value.pos{ color: #a9d0bd; }
+
+  .new-month-btn{
+    background: var(--seal-gold);
+    color: var(--ink);
+    border: none;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 10px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.12s ease;
+  }
+  .new-month-btn:hover{ transform: translateY(-1px); }
+  .new-month-btn:active{ transform: translateY(0px); }
+
+  /* ---------- Income panel ---------- */
+
+  .income-panel{ margin-top: 22px; margin-bottom: 6px; }
+
+  .income-figures{
+    display:flex;
+    gap: 26px;
+    flex-wrap: wrap;
+    margin: 4px 0 14px;
+  }
+  .income-figures .label{
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .income-figures .value{
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .income-figures .value.neg{ color: var(--stamp-red); }
+  .income-figures .value.zero{ color: var(--ink-soft); }
+
+  /* ---------- Verser (distribute) control on envelope cards ---------- */
+
+  .verser-row{
+    display:flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .verser-row input{
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--ink);
+  }
+  .verser-row button{
+    background: var(--sage);
+    color: #fff;
+    border: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .verser-row button:hover{ background: #345a48; }
+
+  /* ---------- Section headings ---------- */
+
+  .section-head{
+    display:flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 36px 0 14px;
+  }
+  .section-head h2{
+    font-size: 18px;
+    margin: 0;
+    font-weight: 700;
+  }
+  .section-head .hint{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Envelope grid ---------- */
+
+  .grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 18px;
+  }
+
+  .envelope{
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: 0 3px 0 var(--shadow);
+    overflow: hidden;
+    padding-top: 46px;
+    min-height: 168px;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.15s ease;
+  }
+
+  .envelope .flap{
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 46px;
+    background: var(--kraft-dark);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    display:flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 4px;
+  }
+
+  .envelope .flap .name{
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    max-width: 78%;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .envelope-body{
+    padding: 16px 16px 14px;
+    display:flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .envelope-body .full-name{
+    font-weight: 700;
+    font-size: 15px;
+    margin: 0 0 2px;
+    word-break: break-word;
+  }
+
+  .envelope-body .rollover-tag{
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  .envelope-body .balance{
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    margin: 2px 0 2px;
+  }
+  .envelope-body .balance.neg{ color: var(--stamp-red); }
+
+  .envelope-body .allocated-line{
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  .fill-track{
+    height: 8px;
+    background: rgba(35,50,77,0.10);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .fill-bar{
+    height: 100%;
+    border-radius: 5px;
+    background: var(--sage);
+    transition: width 0.25s ease, background 0.25s ease;
+  }
+  .fill-bar.warn{ background: var(--seal-gold); }
+  .fill-bar.over{ background: var(--stamp-red); }
+
+  .envelope-actions{
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-mini{
+    flex:1;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .btn-mini:hover{ background: rgba(35,50,77,0.06); }
+  .btn-mini.danger{ color: var(--stamp-red); border-color: var(--stamp-red-bg); }
+  .btn-mini.danger:hover{ background: var(--stamp-red-bg); }
+
+  /* new envelope card */
+  .envelope.add-new{
+    padding-top: 16px;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px dashed var(--ink-soft);
+    background: transparent;
+    box-shadow: none;
+    cursor: pointer;
+    min-height: 168px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    font-size: 14px;
+    text-align: center;
+  }
+  .envelope.add-new:hover{ background: rgba(35,50,77,0.05); color: var(--ink); }
+
+  /* ---------- Forms (paper receipt style) ---------- */
+
+  .receipt{
+    background: var(--paper);
+    border: 1px dashed var(--ink-soft);
+    border-radius: 3px;
+    padding: 18px 20px;
+    margin-top: 14px;
+  }
+
+  .receipt h3{
+    margin: 0 0 14px;
+    font-size: 14.5px;
+    font-weight: 700;
+  }
+
+  .field-row{
+    display:flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .field{
+    flex: 1;
+    min-width: 140px;
+    display:flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .field label{
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .field input, .field select{
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--ink);
+  }
+  .field.checkbox{
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    min-width: auto;
+  }
+  .field.checkbox label{ font-size: 13px; font-weight: 500; color: var(--ink); }
+
+  .receipt-actions{
+    display:flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .btn{
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 9px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: none;
+  }
+  .btn.primary{ background: var(--ink); color: var(--paper); }
+  .btn.primary:hover{ background: #17233a; }
+  .btn.ghost{ background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn.ghost:hover{ background: rgba(35,50,77,0.06); }
+
+  /* ---------- Transactions history ---------- */
+
+  .history{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .history-filter{
+    display:flex;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .history-filter select{
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: #fff;
+  }
+
+  table.tx-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  table.tx-table th{
+    text-align: left;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.tx-table td{
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(35,50,77,0.08);
+    vertical-align: top;
+  }
+  table.tx-table tr:last-child td{ border-bottom: none; }
+  table.tx-table td.amount{
+    font-family: var(--font-display);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  table.tx-table td.amount.neg{ color: var(--stamp-red); }
+  table.tx-table td.amount.pos{ color: var(--sage); }
+  table.tx-table td.env-tag{
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .del-tx{
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: underline;
+    padding: 0;
+  }
+  .del-tx:hover{ color: var(--stamp-red); }
+
+  .empty-state{
+    padding: 30px 16px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+  }
+
+  /* ---------- Footer: export / import ---------- */
+
+  footer{
+    margin-top: 44px;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  footer .note{
+    font-size: 12px;
+    color: var(--ink-soft);
+    max-width: 480px;
+  }
+  footer .actions{ display:flex; gap: 10px; }
+
+  #import-input{ display:none; }
+
+  @media (max-width: 560px){
+    .ledger-figures{ gap: 18px; }
+    .figure .value{ font-size: 18px; }
+    header.ledger{ align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="ledger">
+    <div>
+      <p class="ledger-title">MES ENVELOPPES</p>
+      <p class="ledger-month" id="month-label">—</p>
+    </div>
+    <div class="ledger-figures">
+      <div class="figure">
+        <div class="label">Alloué ce mois</div>
+        <div class="value" id="total-allocated">0 €</div>
+      </div>
+      <div class="figure">
+        <div class="label">Dépensé ce mois</div>
+        <div class="value" id="total-spent">0 €</div>
+      </div>
+      <div class="figure">
+        <div class="label">Disponible</div>
+        <div class="value" id="total-available">0 €</div>
+      </div>
+    </div>
+    <button class="new-month-btn" id="new-month-btn">Passer au mois suivant</button>
+  </header>
+
+  <div class="receipt income-panel" id="income-panel">
+    <h3>Revenu non affecté</h3>
+    <div class="income-figures">
+      <div class="figure">
+        <div class="label">Revenu total ajouté</div>
+        <div class="value" id="income-total">0 €</div>
+      </div>
+      <div class="figure">
+        <div class="label">Distribué dans les enveloppes</div>
+        <div class="value" id="income-distributed">0 €</div>
+      </div>
+      <div class="figure">
+        <div class="label">Reste à distribuer</div>
+        <div class="value" id="income-remaining">0 €</div>
+      </div>
+    </div>
+    <div class="receipt-actions">
+      <button class="btn primary" id="add-income-btn">Ajouter un revenu</button>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Enveloppes</h2>
+    <span class="hint" id="envelope-count-hint"></span>
+  </div>
+
+  <div class="grid" id="envelope-grid"></div>
+
+  <div class="receipt" id="add-envelope-form" style="display:none;">
+    <h3>Nouvelle enveloppe</h3>
+    <div class="field-row">
+      <div class="field">
+        <label for="env-name">Nom</label>
+        <input type="text" id="env-name" placeholder="ex. Courses">
+      </div>
+      <div class="field">
+        <label for="env-amount">Montant alloué / mois</label>
+        <input type="number" id="env-amount" placeholder="ex. 300" min="0" step="1">
+      </div>
+      <div class="field checkbox">
+        <input type="checkbox" id="env-rollover">
+        <label for="env-rollover">Le solde se reporte au mois suivant</label>
+      </div>
+    </div>
+    <div class="receipt-actions">
+      <button class="btn primary" id="save-envelope-btn">Créer l'enveloppe</button>
+      <button class="btn ghost" id="cancel-envelope-btn">Annuler</button>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Ajouter une dépense</h2>
+    <span class="hint">Un montant négatif enregistre un remboursement / ajout</span>
+  </div>
+
+  <div class="receipt">
+    <div class="field-row">
+      <div class="field">
+        <label for="tx-envelope">Enveloppe</label>
+        <select id="tx-envelope"></select>
+      </div>
+      <div class="field">
+        <label for="tx-amount">Montant (€)</label>
+        <input type="number" id="tx-amount" placeholder="ex. 24.90" step="0.01">
+      </div>
+      <div class="field">
+        <label for="tx-date">Date</label>
+        <input type="date" id="tx-date">
+      </div>
+      <div class="field">
+        <label for="tx-desc">Description</label>
+        <input type="text" id="tx-desc" placeholder="ex. Carrefour">
+      </div>
+    </div>
+    <div class="receipt-actions">
+      <button class="btn primary" id="save-tx-btn">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Historique</h2>
+  </div>
+
+  <div class="history">
+    <div class="history-filter">
+      <select id="filter-envelope">
+        <option value="all">Toutes les enveloppes</option>
+      </select>
+    </div>
+    <div id="history-body"></div>
+  </div>
+
+  <footer>
+    <p class="note">Les données ne sont pas liées à un compte. Elles restent dans ce navigateur ; exporte un fichier de sauvegarde régulièrement si tu changes d'appareil ou vides ton navigateur.</p>
+    <div class="actions">
+      <button class="btn ghost" id="export-btn">Exporter la sauvegarde</button>
+      <button class="btn ghost" id="import-btn">Importer une sauvegarde</button>
+      <input type="file" id="import-input" accept="application/json">
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+
+  const STORAGE_KEY = 'enveloppes-budget-state-v1';
+
+  const MOIS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+  function uid(){
+    return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  }
+
+  function todayISO(){
+    const d = new Date();
+    return d.toISOString().slice(0,10);
+  }
+
+  function firstOfMonthISO(){
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10);
+  }
+
+  function defaultState(){
+    return {
+      envelopes: [],
+      transactions: [],
+      monthStart: firstOfMonthISO(),
+      monthLabel: null,
+      income: { total: 0, distributed: 0 }
+    };
+  }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      if(!parsed.envelopes || !parsed.transactions) return defaultState();
+      if(!parsed.income) parsed.income = { total: 0, distributed: 0 };
+      return parsed;
+    }catch(e){
+      return defaultState();
+    }
+  }
+
+  let state = loadState();
+
+  function saveState(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){
+      console.warn('Sauvegarde locale impossible', e);
+    }
+  }
+
+  function fmt(n){
+    const sign = n < 0 ? '-' : '';
+    return sign + Math.abs(n).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+  }
+
+  function monthLabelFor(dateISO){
+    const d = new Date(dateISO + 'T00:00:00');
+    return MOIS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function spentThisMonth(envId){
+    return state.transactions
+      .filter(t => t.envelopeId === envId && t.date >= state.monthStart)
+      .reduce((sum,t) => sum + t.amount, 0);
+  }
+
+  // ---------- Rendering ----------
+
+  function render(){
+    document.getElementById('month-label').textContent = monthLabelFor(state.monthStart);
+
+    let totalAllocated = 0, totalSpent = 0, totalAvailable = 0;
+    state.envelopes.forEach(env => {
+      totalAllocated += env.allocated;
+      totalSpent += spentThisMonth(env.id);
+      totalAvailable += env.balance;
+    });
+
+    document.getElementById('total-allocated').textContent = fmt(totalAllocated);
+    const spentEl = document.getElementById('total-spent');
+    spentEl.textContent = fmt(totalSpent);
+    const availEl = document.getElementById('total-available');
+    availEl.textContent = fmt(totalAvailable);
+    availEl.className = 'value ' + (totalAvailable < 0 ? 'neg' : 'pos');
+
+    const remaining = state.income.total - state.income.distributed;
+    document.getElementById('income-total').textContent = fmt(state.income.total);
+    document.getElementById('income-distributed').textContent = fmt(state.income.distributed);
+    const remEl = document.getElementById('income-remaining');
+    remEl.textContent = fmt(remaining);
+    remEl.className = 'value' + (remaining < 0 ? ' neg' : remaining === 0 ? ' zero' : '');
+
+    renderEnvelopes();
+    renderTxEnvelopeOptions();
+    renderFilterOptions();
+    renderHistory();
+    saveState();
+  }
+
+  function renderEnvelopes(){
+    const grid = document.getElementById('envelope-grid');
+    grid.innerHTML = '';
+
+    document.getElementById('envelope-count-hint').textContent =
+      state.envelopes.length ? state.envelopes.length + ' enveloppe' + (state.envelopes.length > 1 ? 's' : '') : '';
+
+    state.envelopes.forEach(env => {
+      const spent = spentThisMonth(env.id);
+      const pct = env.allocated > 0 ? Math.min(100, Math.max(0, (spent / env.allocated) * 100)) : 0;
+      let barClass = '';
+      if(spent > env.allocated) barClass = 'over';
+      else if(pct >= 75) barClass = 'warn';
+
+      const card = document.createElement('div');
+      card.className = 'envelope';
+      card.innerHTML = `
+        <div class="flap"><span class="name">${escapeHtml(env.name)}</span></div>
+        <div class="envelope-body">
+          <p class="full-name">${escapeHtml(env.name)}</p>
+          <p class="rollover-tag">${env.rollover ? 'Report activé' : 'Remise à zéro chaque mois'}</p>
+          <p class="balance ${env.balance < 0 ? 'neg' : ''}">${fmt(env.balance)}</p>
+          <p class="allocated-line">${fmt(spent)} dépensé sur ${fmt(env.allocated)}</p>
+          <div class="fill-track"><div class="fill-bar ${barClass}" style="width:${pct}%"></div></div>
+          <div class="verser-row">
+            <input type="number" min="0" step="0.01" placeholder="Montant à verser" id="verser-input-${env.id}">
+            <button data-action="verser" data-id="${env.id}">Verser</button>
+          </div>
+          <div class="envelope-actions">
+            <button class="btn-mini" data-action="edit" data-id="${env.id}">Modifier</button>
+            <button class="btn-mini danger" data-action="delete" data-id="${env.id}">Supprimer</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    const addCard = document.createElement('div');
+    addCard.className = 'envelope add-new';
+    addCard.id = 'add-envelope-trigger';
+    addCard.innerHTML = '+ Nouvelle enveloppe';
+    grid.appendChild(addCard);
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function renderTxEnvelopeOptions(){
+    const sel = document.getElementById('tx-envelope');
+    const current = sel.value;
+    sel.innerHTML = '';
+    if(state.envelopes.length === 0){
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'Crée d\'abord une enveloppe';
+      sel.appendChild(opt);
+      return;
+    }
+    state.envelopes.forEach(env => {
+      const opt = document.createElement('option');
+      opt.value = env.id;
+      opt.textContent = env.name;
+      sel.appendChild(opt);
+    });
+    if([...sel.options].some(o => o.value === current)) sel.value = current;
+  }
+
+  function renderFilterOptions(){
+    const sel = document.getElementById('filter-envelope');
+    const current = sel.value;
+    sel.innerHTML = '<option value="all">Toutes les enveloppes</option>';
+    state.envelopes.forEach(env => {
+      const opt = document.createElement('option');
+      opt.value = env.id;
+      opt.textContent = env.name;
+      sel.appendChild(opt);
+    });
+    if([...sel.options].some(o => o.value === current)) sel.value = current;
+  }
+
+  function renderHistory(){
+    const filter = document.getElementById('filter-envelope').value || 'all';
+    const body = document.getElementById('history-body');
+
+    let txs = [...state.transactions];
+    if(filter !== 'all') txs = txs.filter(t => t.envelopeId === filter);
+    txs.sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+
+    if(txs.length === 0){
+      body.innerHTML = '<div class="empty-state">Aucune dépense enregistrée pour le moment.</div>';
+      return;
+    }
+
+    const envName = id => {
+      const e = state.envelopes.find(en => en.id === id);
+      return e ? e.name : '(supprimée)';
+    };
+
+    let rows = txs.map(t => `
+      <tr>
+        <td>${t.date.split('-').reverse().join('/')}</td>
+        <td>${escapeHtml(t.description || '—')}</td>
+        <td class="env-tag">${escapeHtml(envName(t.envelopeId))}</td>
+        <td class="amount ${t.amount < 0 ? 'pos' : 'neg'}">${t.amount < 0 ? '+ ' + fmt(-t.amount) : '- ' + fmt(t.amount)}</td>
+        <td><button class="del-tx" data-id="${t.id}">retirer</button></td>
+      </tr>
+    `).join('');
+
+    body.innerHTML = `
+      <table class="tx-table">
+        <thead>
+          <tr><th>Date</th><th>Description</th><th>Enveloppe</th><th>Montant</th><th></th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  // ---------- Actions ----------
+
+  function addEnvelope(name, amount, rollover){
+    state.envelopes.push({
+      id: uid(),
+      name: name,
+      allocated: amount,
+      rollover: rollover,
+      balance: amount
+    });
+    render();
+  }
+
+  function deleteEnvelope(id){
+    if(!confirm('Supprimer cette enveloppe ? Son historique de dépenses restera visible mais ne pourra plus être associé à elle.')) return;
+    state.envelopes = state.envelopes.filter(e => e.id !== id);
+    render();
+  }
+
+  function editEnvelope(id){
+    const env = state.envelopes.find(e => e.id === id);
+    if(!env) return;
+    const newName = prompt('Nom de l\'enveloppe', env.name);
+    if(newName === null) return;
+    const newAmountRaw = prompt('Montant alloué par mois (€)', env.allocated);
+    if(newAmountRaw === null) return;
+    const newAmount = parseFloat(newAmountRaw.replace(',', '.'));
+    if(isNaN(newAmount) || newAmount < 0) { alert('Montant invalide.'); return; }
+    const newRollover = confirm('Le solde doit-il se reporter au mois suivant ?\nOK = oui, report activé. Annuler = non, remise à zéro chaque mois.');
+    env.name = newName.trim() || env.name;
+    env.allocated = newAmount;
+    env.rollover = newRollover;
+    render();
+  }
+
+  function addTransaction(envelopeId, amount, date, description, type){
+    state.transactions.push({
+      id: uid(),
+      envelopeId,
+      amount,
+      date,
+      description,
+      type: type || 'expense'
+    });
+    const env = state.envelopes.find(e => e.id === envelopeId);
+    if(env) env.balance -= amount;
+    render();
+  }
+
+  function addDistribution(envelopeId, amount, date, description){
+    state.income.distributed += amount;
+    addTransaction(envelopeId, -amount, date, description || 'Distribution du revenu', 'distribution');
+  }
+
+  function addIncome(amount){
+    state.income.total += amount;
+    render();
+  }
+
+  function deleteTransaction(id){
+    const tx = state.transactions.find(t => t.id === id);
+    if(!tx) return;
+    const env = state.envelopes.find(e => e.id === tx.envelopeId);
+    if(env) env.balance += tx.amount;
+    if(tx.type === 'distribution') state.income.distributed += tx.amount;
+    state.transactions = state.transactions.filter(t => t.id !== id);
+    render();
+  }
+
+  function startNewMonth(){
+    if(!confirm('Passer au mois suivant ? Les enveloppes avec report garderont leur solde et recevront leur nouvelle allocation ; les autres repartiront à zéro puis recevront leur allocation.')) return;
+    state.envelopes.forEach(env => {
+      if(env.rollover){
+        env.balance = env.balance + env.allocated;
+      } else {
+        env.balance = env.allocated;
+      }
+    });
+    const d = new Date();
+    state.monthStart = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10);
+    render();
+  }
+
+  function exportData(){
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'enveloppes-sauvegarde-' + todayISO() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        const parsed = JSON.parse(e.target.result);
+        if(!Array.isArray(parsed.envelopes) || !Array.isArray(parsed.transactions)){
+          alert('Ce fichier ne ressemble pas à une sauvegarde valide.');
+          return;
+        }
+        if(!confirm('Importer ce fichier remplacera toutes les données actuelles. Continuer ?')) return;
+        state = parsed;
+        if(!state.monthStart) state.monthStart = firstOfMonthISO();
+        if(!state.income) state.income = { total: 0, distributed: 0 };
+        render();
+      }catch(err){
+        alert('Impossible de lire ce fichier : ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ---------- Event wiring ----------
+
+  document.getElementById('envelope-grid').addEventListener('click', function(e){
+    const trigger = e.target.closest('#add-envelope-trigger');
+    if(trigger){
+      document.getElementById('add-envelope-form').style.display = 'block';
+      document.getElementById('env-name').focus();
+      return;
+    }
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.dataset.action === 'delete') deleteEnvelope(id);
+    if(btn.dataset.action === 'edit') editEnvelope(id);
+    if(btn.dataset.action === 'verser'){
+      const input = document.getElementById('verser-input-' + id);
+      const amount = parseFloat((input.value || '').replace(',', '.'));
+      if(isNaN(amount) || amount <= 0){ alert('Indique un montant à verser.'); return; }
+      addDistribution(id, amount, todayISO());
+    }
+  });
+
+  document.getElementById('add-income-btn').addEventListener('click', function(){
+    const raw = prompt('Montant du revenu à ajouter au pot non affecté (€) :');
+    if(raw === null) return;
+    const amount = parseFloat(raw.replace(',', '.'));
+    if(isNaN(amount)){ alert('Montant invalide.'); return; }
+    addIncome(amount);
+  });
+
+  document.getElementById('save-envelope-btn').addEventListener('click', function(){
+    const name = document.getElementById('env-name').value.trim();
+    const amount = parseFloat(document.getElementById('env-amount').value);
+    const rollover = document.getElementById('env-rollover').checked;
+    if(!name){ alert('Donne un nom à l\'enveloppe.'); return; }
+    if(isNaN(amount) || amount < 0){ alert('Indique un montant valide.'); return; }
+    addEnvelope(name, amount, rollover);
+    document.getElementById('env-name').value = '';
+    document.getElementById('env-amount').value = '';
+    document.getElementById('env-rollover').checked = false;
+    document.getElementById('add-envelope-form').style.display = 'none';
+  });
+
+  document.getElementById('cancel-envelope-btn').addEventListener('click', function(){
+    document.getElementById('add-envelope-form').style.display = 'none';
+  });
+
+  document.getElementById('save-tx-btn').addEventListener('click', function(){
+    const envelopeId = document.getElementById('tx-envelope').value;
+    const amount = parseFloat(document.getElementById('tx-amount').value.replace(',', '.'));
+    const date = document.getElementById('tx-date').value || todayISO();
+    const description = document.getElementById('tx-desc').value.trim();
+    if(!envelopeId){ alert('Crée d\'abord une enveloppe.'); return; }
+    if(isNaN(amount)){ alert('Indique un montant valide.'); return; }
+    addTransaction(envelopeId, amount, date, description);
+    document.getElementById('tx-amount').value = '';
+    document.getElementById('tx-desc').value = '';
+  });
+
+  document.getElementById('history-body').addEventListener('click', function(e){
+    const btn = e.target.closest('.del-tx');
+    if(!btn) return;
+    deleteTransaction(btn.dataset.id);
+  });
+
+  document.getElementById('filter-envelope').addEventListener('change', renderHistory);
+
+  document.getElementById('new-month-btn').addEventListener('click', startNewMonth);
+
+  document.getElementById('export-btn').addEventListener('click', exportData);
+  document.getElementById('import-btn').addEventListener('click', function(){
+    document.getElementById('import-input').click();
+  });
+  document.getElementById('import-input').addEventListener('change', function(e){
+    if(e.target.files && e.target.files[0]) importData(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  // init
+  document.getElementById('tx-date').value = todayISO();
+  render();
+
+})();
+</script>
+
+</body>
+</html>

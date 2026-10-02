@@ -963,8 +963,9 @@
         env.balance = env.allocated;
       }
     });
-    const d = new Date();
-    state.monthStart = toLocalISODate(new Date(d.getFullYear(), d.getMonth(), 1));
+    const cur = new Date(state.monthStart + 'T00:00:00');
+    const next = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+    state.monthStart = toLocalISODate(next);
     render();
   }
 
